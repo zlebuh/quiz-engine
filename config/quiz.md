@@ -17,13 +17,13 @@
 
 # Section 2: Geografie
 
-1. Kolik je na mistrovstí světa ryze ostrovních zemí (tj. nedělí se o půdu s jiným státem)?
+1. Kolik je na mistrovství světa ryze ostrovních zemí (tj. nedělí se o pevninu s jiným státem)?
    Answer: 5 (Austrálie, Japonsko, Nový Zéland, Curacao, Kapverdy)
 
 2. Který z účastníků má nejjižněji položený bod ze všech?
    Answer: Argentina
 
-3. Jaká nepořádající účastnická země má největší rozlohu?
+3. Která nepořádající účastnická země má největší rozlohu?
    Answer: Brazílie
 
 4. DR Kongo už jednu účast na MS zažilo. V roce 1974, ale pod jiným jménem. Jakým?
