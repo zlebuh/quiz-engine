@@ -93,6 +93,8 @@ app.get('/theme.css', (req, res) => {
   --text:     ${c.text};
   --muted:    ${c.muted};
   --gold:     ${c.accent};
+  --purple:   ${c.purple   || c.primary};
+  --lime:     ${c.lime     || c.accent};
 }`.trim());
 });
 

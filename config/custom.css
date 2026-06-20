@@ -1,38 +1,386 @@
 /*
- * Custom styles — loaded last, so anything here overrides the defaults.
+ * FIFA World Cup 2026 — Official Brand Theme
+ * Colors taken from the real WC2026 identity:
+ *   Red    #E8322A  — dominant brand color
+ *   Purple #6B24CC  — secondary brand color
+ *   Lime   #C5E227  — tertiary / energy accent
+ *   White  #FFFFFF  — primary text & "26" logotype
+ *   Black  #0C0C0C  — background
  *
- * CSS variables available (set in config/theme.json, override here if you want):
- *   --accent      primary highlight color (buttons, timer ring, headings)
- *   --green       section badges, start button
- *   --red         wrong answers, stop timer button
- *   --gold        alias for --accent (used interchangeably)
- *   --bg          page background
- *   --surface     card background
- *   --surface2    input / inner element background
- *   --text        body text
- *   --muted       secondary / placeholder text
- *   --radius      border radius for cards and inputs
- *
- * Key selectors:
- *   body                    page background and font
- *   .card                   question / lobby / standings panels
- *   .btn-primary            gold action button
- *   .btn-green              start / confirm button
- *   .btn-danger             stop timer button
- *   .btn-ghost              neutral button
- *   .section-badge          colored pill above question
- *   .question-text          large question text
- *   .standings-table        scoreboard table
- *   .timer-ring .progress   SVG arc (stroke color)
- *   .player-pill            player name chip in lobby
- *   .ps-chip                player status chip on host bar
- *   .fireworks              emoji shown on final screen
- *   h1, h2, h3              headings
+ * Edit config/theme.json to change colors.
+ * Override any rule below to further customise.
  */
 
-/* Example: change the font */
-/* @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;700&display=swap');
-body { font-family: 'Oswald', sans-serif; } */
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Inter:wght@400;500;600&display=swap');
 
-/* Example: rounded cards with a subtle glow */
-/* .card { border-color: var(--accent); box-shadow: 0 0 20px rgba(201,162,39,.15); } */
+/* ── Base ────────────────────────────────────────────────────────── */
+:root { --radius: 6px; }
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  color: var(--text);
+  min-height: 100vh;
+  /* Bold WC2026 color-block background — purple left, red center, lime right */
+  background:
+    radial-gradient(ellipse 55% 70% at 0% 50%,   #5B1FC8 0%, transparent 70%),
+    radial-gradient(ellipse 55% 70% at 100% 50%,  #9DC41A 0%, transparent 70%),
+    radial-gradient(ellipse 80% 90% at 50% 50%,   #E8322A 0%, #C42820 100%);
+  background-attachment: fixed;
+}
+
+body > * { position: relative; z-index: 1; }
+
+/* ── Typography ──────────────────────────────────────────────────── */
+h1 {
+  font-family: 'Barlow Condensed', system-ui, sans-serif;
+  font-size: clamp(1.9rem, 6vw, 2.8rem);
+  font-weight: 900;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: #fff;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+h2 {
+  font-family: 'Barlow Condensed', system-ui, sans-serif;
+  font-size: 1.7rem;
+  font-weight: 800;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  color: #fff;
+}
+
+h3 {
+  font-family: 'Barlow Condensed', system-ui, sans-serif;
+  font-size: .85rem;
+  font-weight: 700;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* ── Logo ────────────────────────────────────────────────────────── */
+.logo {
+  font-size: 3rem;
+  margin-bottom: 6px;
+  display: block;
+}
+
+/* ── Cards ───────────────────────────────────────────────────────── */
+.card {
+  background: rgba(10, 10, 10, 0.78);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: var(--radius);
+  padding: 28px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 16px 56px rgba(0,0,0,.55);
+}
+
+/* Bold red→purple left-border accent */
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; bottom: 0;
+  width: 3px;
+  background: linear-gradient(180deg, var(--accent) 0%, var(--purple) 100%);
+}
+
+/* ── Inputs ──────────────────────────────────────────────────────── */
+input[type=text] {
+  background: var(--surface2);
+  border: 1px solid rgba(255,255,255,.09);
+  border-radius: var(--radius);
+  color: #fff;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 1.05rem;
+  padding: 13px 16px;
+  transition: border-color .2s, box-shadow .2s;
+}
+
+input[type=text]:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(232,50,42,.18);
+  outline: none;
+}
+
+input[type=text]::placeholder { color: var(--muted); }
+
+/* ── Buttons ─────────────────────────────────────────────────────── */
+button {
+  font-family: 'Barlow Condensed', system-ui, sans-serif;
+  font-size: 1.1rem;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  border-radius: var(--radius);
+  padding: 11px 26px;
+  transition: filter .15s, transform .1s;
+}
+
+button:hover:not(:disabled) { filter: brightness(1.1); transform: translateY(-1px); }
+button:active:not(:disabled) { transform: translateY(0); filter: brightness(.95); }
+
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+  font-size: 1.1rem;
+}
+
+.btn-green {
+  background: var(--purple);
+  color: #fff;
+}
+
+.btn-danger {
+  background: #1a1a1a;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: #fff;
+  border: 1px solid rgba(255,255,255,.14);
+}
+
+.btn-ghost:hover:not(:disabled) { background: rgba(255,255,255,.06); }
+
+/* ── Section badge ───────────────────────────────────────────────── */
+.section-badge {
+  font-family: 'Barlow Condensed', system-ui, sans-serif;
+  font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  background: var(--purple);
+  color: #fff;
+  border: none;
+  border-radius: 3px;
+  padding: 3px 10px;
+  display: inline-block;
+  margin-bottom: 12px;
+}
+
+/* ── Question text ───────────────────────────────────────────────── */
+.question-text {
+  font-family: 'Barlow Condensed', system-ui, sans-serif;
+  font-size: clamp(1.6rem, 5vw, 2.2rem);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: .02em;
+  color: #fff;
+  margin: 14px 0 20px;
+}
+
+/* ── Timer ───────────────────────────────────────────────────────── */
+.timer-ring { width: 120px; height: 120px; }
+.timer-ring svg { width: 120px; height: 120px; }
+.timer-ring .track    { stroke: rgba(255,255,255,.07); }
+.timer-ring .progress { stroke: var(--lime); stroke-width: 9; }
+.timer-ring .progress.urgent { stroke: var(--accent); }
+
+.timer-number {
+  font-family: 'Barlow Condensed', system-ui, sans-serif;
+  font-size: 2.6rem;
+  font-weight: 900;
+  color: var(--lime);
+}
+.timer-number.urgent { color: var(--accent); }
+
+/* ── Answer submitted ────────────────────────────────────────────── */
+.answer-submitted {
+  font-family: 'Barlow Condensed', system-ui, sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--lime);
+  background: rgba(197,226,39,.08);
+  border: 1px solid rgba(197,226,39,.22);
+  border-radius: var(--radius);
+  padding: 10px 16px;
+  margin: 8px 0;
+}
+
+/* ── Status messages ─────────────────────────────────────────────── */
+.status-msg {
+  font-family: 'Barlow Condensed', system-ui, sans-serif;
+  font-size: 1.1rem;
+  font-weight: 600;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* ── Player pills (lobby) ────────────────────────────────────────── */
+.player-pill {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: .88rem;
+  font-weight: 500;
+  background: var(--surface2);
+  border: 1px solid rgba(255,255,255,.09);
+  border-radius: 100px;
+  padding: 5px 16px;
+  display: inline-block;
+  margin: 3px;
+  color: #fff;
+}
+
+/* ── Standings table ─────────────────────────────────────────────── */
+.standings-table { border-collapse: collapse; width: 100%; }
+
+.standings-table th {
+  font-family: 'Barlow Condensed', system-ui, sans-serif;
+  font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 8px 14px;
+  border-bottom: 1px solid rgba(255,255,255,.07);
+  text-align: left;
+}
+
+.standings-table td {
+  padding: 13px 14px;
+  border-bottom: 1px solid rgba(255,255,255,.05);
+}
+
+/* 1st = lime, 2nd = white, 3rd = muted */
+.standings-table tbody tr:nth-child(1) td { color: var(--lime);  font-weight: 700; font-size: 1.05rem; }
+.standings-table tbody tr:nth-child(2) td { color: #fff; }
+.standings-table tbody tr:nth-child(3) td { color: #bbb; }
+
+.standings-table .rank {
+  font-family: 'Barlow Condensed', system-ui, sans-serif;
+  font-size: .8rem;
+  color: var(--muted);
+  width: 32px;
+}
+
+/* ── Review table ────────────────────────────────────────────────── */
+.review-table { font-size: .85rem; border-collapse: collapse; }
+
+.review-table th {
+  font-family: 'Barlow Condensed', system-ui, sans-serif;
+  font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  background: var(--surface2);
+  color: var(--muted);
+  padding: 8px 10px;
+  border: 1px solid rgba(255,255,255,.06);
+  text-align: left;
+  line-height: 1.4;
+}
+
+.review-table td {
+  border: 1px solid rgba(255,255,255,.05);
+  vertical-align: top;
+  padding: 8px 10px;
+}
+
+.badge.correct {
+  background: rgba(197,226,39,.12);
+  color: var(--lime);
+  border: 1px solid rgba(197,226,39,.25);
+}
+
+.badge.wrong {
+  background: rgba(232,50,42,.12);
+  color: #ff6b63;
+  border: 1px solid rgba(232,50,42,.25);
+}
+
+.badge.empty {
+  background: rgba(255,255,255,.04);
+  color: var(--muted);
+  border: 1px solid rgba(255,255,255,.07);
+}
+
+/* ── QR code ─────────────────────────────────────────────────────── */
+.qr-box svg, .qr-box img {
+  width: 170px;
+  height: 170px;
+  border-radius: 8px;
+  padding: 10px;
+  background: #fff;
+  box-shadow: 0 4px 30px rgba(0,0,0,.6);
+}
+
+.url-label {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: .82rem;
+  color: var(--muted);
+  margin-top: 8px;
+}
+
+/* ── Fireworks / final screen ────────────────────────────────────── */
+.fireworks {
+  font-size: 3.5rem;
+  text-align: center;
+  margin: 16px 0;
+  animation: pop 1.2s ease-in-out infinite alternate;
+}
+
+@keyframes pop {
+  from { transform: scale(1); }
+  to   { transform: scale(1.1); }
+}
+
+/* ── Host bar ────────────────────────────────────────────────────── */
+.host-bar {
+  background: rgba(12,12,12,.94) !important;
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(255,255,255,.06) !important;
+}
+
+.host-bar h1 { font-size: 1rem; }
+
+.phase-label {
+  font-family: 'Barlow Condensed', system-ui, sans-serif;
+  font-size: .7rem;
+  font-weight: 800;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  background: rgba(107,36,204,.25);
+  color: #c4aaff;
+  border: 1px solid rgba(107,36,204,.4);
+  border-radius: 3px;
+  padding: 3px 10px;
+}
+
+/* ── Player status bar ───────────────────────────────────────────── */
+.player-status-bar {
+  background: rgba(12,12,12,.88) !important;
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(255,255,255,.05) !important;
+}
+
+.ps-chip {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: .78rem;
+  font-weight: 500;
+  border-radius: 100px;
+  border: 1px solid rgba(255,255,255,.08) !important;
+  background: var(--surface2) !important;
+  padding: 3px 12px;
+}
+
+.ps-chip.online  .dot { background: var(--lime) !important; }
+.ps-chip.offline .dot { background: var(--muted) !important; }
+
+/* ── Error text ──────────────────────────────────────────────────── */
+#join-error {
+  font-family: 'Barlow Condensed', system-ui, sans-serif;
+  font-size: .95rem;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+#answer-locked-msg { color: var(--accent) !important; }

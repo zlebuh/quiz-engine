@@ -1,15 +1,17 @@
 {
   "title": "FIFA World Cup 2026",
   "subtitle": "Trivia Quiz",
-  "emoji": "⚽",
+  "emoji": "🏆",
   "colors": {
-    "accent":   "#c9a227",
-    "primary":  "#1a6b2e",
-    "danger":   "#c0392b",
-    "bg":       "#0d1117",
-    "surface":  "#161b22",
-    "surface2": "#21262d",
-    "text":     "#e6edf3",
-    "muted":    "#8b949e"
+    "accent":   "#E8322A",
+    "primary":  "#E8322A",
+    "danger":   "#E8322A",
+    "purple":   "#6B24CC",
+    "lime":     "#C5E227",
+    "bg":       "#0C0C0C",
+    "surface":  "#131313",
+    "surface2": "#1C1C1C",
+    "text":     "#FFFFFF",
+    "muted":    "#585858"
   }
 }
