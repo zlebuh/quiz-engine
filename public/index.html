@@ -1,22 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Quiz</title>
-  <link rel="stylesheet" href="/theme.css" />
   <link rel="stylesheet" href="/style.css" />
   <link rel="stylesheet" href="/custom.css" />
 </head>
+
 <body>
-  <div class="logo" id="theme-emoji"></div>
   <h1 id="theme-title"></h1>
 
   <!-- JOIN SCREEN -->
   <div id="screen-join" class="card">
     <h2>Enter your name</h2>
-    <p style="color:var(--muted);margin-bottom:14px;">Last name is enough.</p>
-    <input type="text" id="input-name" placeholder="Your last name" maxlength="30" autocomplete="off" />
+    <input type="text" id="input-name" placeholder="Your name" maxlength="30" autocomplete="off" />
     <button class="btn-primary" id="btn-join" style="width:100%">Join Quiz</button>
     <p id="join-error" style="color:var(--red);margin-top:8px;display:none"></p>
   </div>
@@ -35,8 +34,8 @@
 
     <div class="timer-ring hidden" id="timer-ring">
       <svg viewBox="0 0 100 100" width="110" height="110">
-        <circle class="track" cx="50" cy="50" r="45"/>
-        <circle class="progress" id="timer-arc" cx="50" cy="50" r="45"/>
+        <circle class="track" cx="50" cy="50" r="45" />
+        <circle class="progress" id="timer-arc" cx="50" cy="50" r="45" />
       </svg>
       <div class="timer-number" id="timer-number">30</div>
     </div>
@@ -59,7 +58,13 @@
   <div id="screen-standings" class="card hidden">
     <h2 id="standings-title">Standings</h2>
     <table class="standings-table">
-      <thead><tr><th class="rank">#</th><th>Player</th><th>Score</th></tr></thead>
+      <thead>
+        <tr>
+          <th class="rank">#</th>
+          <th>Player</th>
+          <th>Score</th>
+        </tr>
+      </thead>
       <tbody id="standings-body"></tbody>
     </table>
   </div>
@@ -69,7 +74,13 @@
     <div class="fireworks">🏆🎉</div>
     <h2 class="center">Final Standings</h2>
     <table class="standings-table">
-      <thead><tr><th class="rank">#</th><th>Player</th><th>Score</th></tr></thead>
+      <thead>
+        <tr>
+          <th class="rank">#</th>
+          <th>Player</th>
+          <th>Score</th>
+        </tr>
+      </thead>
       <tbody id="gameover-body"></tbody>
     </table>
   </div>
@@ -78,10 +89,10 @@
   <script>
     fetch('/api/theme').then(r => r.json()).then(t => {
       document.title = t.title;
-      document.getElementById('theme-emoji').textContent = t.emoji;
       document.getElementById('theme-title').textContent = t.title;
     });
   </script>
   <script src="/player.js"></script>
 </body>
+
 </html>

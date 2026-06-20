@@ -2,16 +2,18 @@ const socket = io();
 
 // ── Screen management ────────────────────────────────────────────────────────
 const screens = ['lobby','question','review','standings','gameover'];
+const playerStatusBar = document.querySelector('.player-status-bar');
+
 function show(name) {
   screens.forEach((s) => document.getElementById(`screen-${s}`).classList.add('hidden'));
   document.getElementById(`screen-${name}`).classList.remove('hidden');
+  playerStatusBar.classList.toggle('hidden', name === 'lobby');
 }
 function setPhase(label) {
   document.getElementById('phase-label').textContent = label;
 }
 
 // ── Elements ─────────────────────────────────────────────────────────────────
-const lobbyPlayers   = document.getElementById('lobby-players');
 const btnStartGame   = document.getElementById('btn-start-game');
 const btnStartTimer  = document.getElementById('btn-start-timer');
 const btnStopTimer   = document.getElementById('btn-stop-timer');
@@ -22,6 +24,7 @@ const btnNextSection = document.getElementById('btn-next-section');
 const hSectionBadge = document.getElementById('h-section-badge');
 const hProgress     = document.getElementById('h-progress');
 const hQtext        = document.getElementById('h-qtext');
+const hAnswerCount  = document.getElementById('h-answer-count');
 const hTimerRing    = document.getElementById('h-timer-ring');
 const hTimerArc     = document.getElementById('h-timer-arc');
 const hTimerNumber  = document.getElementById('h-timer-number');
@@ -43,21 +46,22 @@ let reviewData = null; // cached review payload for re-renders
 // ── Init ──────────────────────────────────────────────────────────────────────
 socket.emit('host-connect');
 
-fetch('/api/join-url').then((r) => r.json()).then(({ url }) => {
-  document.getElementById('url-label').textContent = url;
-});
-
 const playerStatusChips = document.getElementById('player-status-chips');
+let onlinePlayerCount = 0;
 
 function renderPlayerStatus(list) {
-  if (!list.length) { playerStatusChips.innerHTML = '<span style="color:var(--muted);font-size:.8rem">None yet</span>'; return; }
-  playerStatusChips.innerHTML = list.map((p) =>
-    `<span class="ps-chip ${p.online ? 'online' : 'offline'}"><span class="dot"></span>${esc(p.name)}</span>`
-  ).join('');
+  onlinePlayerCount = list.filter((p) => p.online).length;
+  const chips = list.length
+    ? list.map((p) => `<span class="ps-chip ${p.online ? 'online' : 'offline'}"><span class="dot"></span>${esc(p.name)}</span>`).join('')
+    : '<span style="color:var(--muted);font-size:.8rem">None yet</span>';
+  playerStatusChips.innerHTML = chips;
+  const lobby = document.getElementById('lobby-player-chips');
+  if (lobby) lobby.innerHTML = list.length
+    ? list.map((p) => `<span class="ps-chip ${p.online ? 'online' : 'offline'}"><span class="dot"></span>${esc(p.name)}</span>`).join('')
+    : '<span style="color:var(--muted);font-size:.88rem">None yet…</span>';
 }
 
-socket.on('host-ok', ({ playerList, playerStatus, snapshot }) => {
-  renderPlayerList(playerList);
+socket.on('host-ok', ({ playerStatus, snapshot }) => {
   renderPlayerStatus(playerStatus || []);
   restoreHostState(snapshot);
 });
@@ -114,16 +118,6 @@ function restoreHostState(snap) {
 socket.on('player-status', renderPlayerStatus);
 
 // ── Lobby ─────────────────────────────────────────────────────────────────────
-socket.on('player-list', renderPlayerList);
-
-function renderPlayerList(names) {
-  if (!names.length) {
-    lobbyPlayers.innerHTML = '<span style="color:var(--muted)">None yet...</span>';
-    return;
-  }
-  lobbyPlayers.innerHTML = names.map((n) => `<span class="player-pill">${n}</span>`).join('');
-}
-
 btnStartGame.addEventListener('click', () => {
   socket.emit('start-section');
 });
@@ -135,6 +129,8 @@ socket.on('show-question', (data) => {
   hQtext.textContent = data.questionText;
   hTimerRing.classList.add('hidden');
   hAfterTimer.classList.add('hidden');
+  hAnswerCount.classList.add('hidden');
+  hAnswerCount.textContent = '';
   btnStartTimer.classList.remove('hidden');
   btnStopTimer.classList.add('hidden');
   btnStartTimer.disabled = false;
@@ -149,7 +145,14 @@ btnStartTimer.addEventListener('click', () => {
   btnStartTimer.classList.add('hidden');
   btnStopTimer.classList.remove('hidden');
   hTimerRing.classList.remove('hidden');
+  hAnswerCount.classList.remove('hidden');
+  hAnswerCount.textContent = `0 / ${onlinePlayerCount} answered`;
   setPhase('timer');
+});
+
+socket.on('answer-count', ({ submitted, total }) => {
+  hAnswerCount.classList.remove('hidden');
+  hAnswerCount.textContent = `${submitted} / ${total} answered`;
 });
 
 btnStopTimer.addEventListener('click', () => {
@@ -177,6 +180,7 @@ function updateTimer(remaining) {
 socket.on('question-ended', () => {
   btnStopTimer.classList.add('hidden');
   hAfterTimer.classList.remove('hidden');
+  hAnswerCount.classList.add('hidden');
   setPhase('answers locked');
 });
 
@@ -196,98 +200,71 @@ socket.on('show-review', (data) => {
 function renderReview(data) {
   reviewTitle.textContent = `Review — Section ${data.sectionIndex + 1}: ${data.sectionTitle}`;
 
-  // Header row: Q1..Q5 with correct answer
-  reviewHead.innerHTML = `<tr>
-    <th>Player</th>
-    ${data.questions.map((q, qi) => `<th>Q${qi + 1}: ${q.text}<br><span style="color:var(--gold);font-weight:400">${q.answer}</span></th>`).join('')}
-  </tr>`;
-
-  // Body rows: one per player
-  reviewBody.innerHTML = data.players.map((player) => `
-    <tr data-player="${esc(player.name)}">
-      <td class="player-name">${esc(player.name)}</td>
-      ${player.answers.map((ans, qi) => renderAnswerCell(player.name, data.sectionIndex, qi, ans, data.questions[qi].answer)).join('')}
+  // Table 1: questions + correct answers
+  document.getElementById('review-questions-body').innerHTML = data.questions.map((q, qi) => `
+    <tr>
+      <td style="color:var(--muted);font-weight:600;text-align:center">Q${qi + 1}</td>
+      <td>${esc(q.text)}</td>
+      <td style="color:var(--accent);font-weight:600">${esc(q.answer)}</td>
     </tr>
   `).join('');
 
-  // Attach edit listeners
-  reviewBody.querySelectorAll('.edit-btn').forEach((btn) => {
-    btn.addEventListener('click', handleEditClick);
-  });
-  reviewBody.querySelectorAll('.badge.correct, .badge.wrong, .badge.empty').forEach((badge) => {
-    badge.addEventListener('click', handleBadgeToggle);
+  // Table 2: player answers — Q1..QN as columns
+  reviewHead.innerHTML = `<tr>
+    <th>Player</th>
+    ${data.questions.map((_, qi) => `<th>Q${qi + 1}</th>`).join('')}
+  </tr>`;
+
+  reviewBody.innerHTML = data.players.map((player) => `
+    <tr data-player="${esc(player.name)}">
+      <td class="player-name">${esc(player.name)}</td>
+      ${player.answers.map((ans, qi) => renderAnswerCell(player.name, data.sectionIndex, qi, ans)).join('')}
+    </tr>
+  `).join('');
+
+  reviewBody.querySelectorAll('.mark-correct').forEach((btn) => btn.addEventListener('click', () => emitOverride(btn, true)));
+  reviewBody.querySelectorAll('.mark-wrong').forEach((btn) => btn.addEventListener('click', () => emitOverride(btn, false)));
+}
+
+function emitOverride(btn, correct) {
+  const cell = btn.closest('.answer-cell');
+  socket.emit('override-correct', {
+    playerName: cell.dataset.player,
+    sectionIdx: parseInt(cell.dataset.section),
+    questionIdx: parseInt(cell.dataset.qi),
+    correct,
   });
 }
 
-function renderAnswerCell(playerName, sectionIdx, qi, ans, correctAnswer) {
-  const badgeClass = ans.answer === '' ? 'empty' : (ans.correct ? 'correct' : 'wrong');
-  const badgeText  = ans.answer === '' ? 'no answer' : (ans.correct ? '✓ correct' : '✗ wrong');
-  return `<td class="answer-cell"
+function renderAnswerCell(playerName, sectionIdx, qi, ans) {
+  const stateClass = ans.answer === '' ? '' : (ans.correct ? 'state-correct' : 'state-wrong');
+  return `<td class="answer-cell ${stateClass}"
     data-player="${esc(playerName)}"
     data-section="${sectionIdx}"
     data-qi="${qi}"
     data-correct="${ans.correct}">
     <span class="ans">${esc(ans.answer || '—')}</span>
-    <span class="badge ${badgeClass} correct-toggle" title="Click to toggle">${badgeText}</span>
-    <button class="edit-btn" title="Edit answer">✏</button>
+    <div class="cell-actions">
+      <button class="mark-correct mark-btn" title="Mark correct">✓</button>
+      <button class="mark-wrong mark-btn" title="Mark wrong">✗</button>
+    </div>
   </td>`;
 }
 
-function handleBadgeToggle(e) {
-  const cell = e.target.closest('.answer-cell');
-  const playerName = cell.dataset.player;
-  const sectionIdx = parseInt(cell.dataset.section);
-  const qi         = parseInt(cell.dataset.qi);
-  const currentCorrect = cell.dataset.correct === 'true';
-  socket.emit('override-correct', { playerName, sectionIdx, questionIdx: qi, correct: !currentCorrect });
-}
-
-function handleEditClick(e) {
-  const cell = e.target.closest('.answer-cell');
-  const existing = cell.querySelector('.inline-edit-form');
-  if (existing) { existing.remove(); return; }
-
-  const currentAnswer = cell.querySelector('.ans').textContent.replace('—','').trim();
-  const form = document.createElement('div');
-  form.className = 'inline-edit-form';
-  form.innerHTML = `<input type="text" value="${esc(currentAnswer)}" maxlength="80" />
-    <button class="btn-primary save-edit">Save</button>
-    <button class="btn-ghost cancel-edit">✕</button>`;
-  cell.appendChild(form);
-
-  form.querySelector('.cancel-edit').addEventListener('click', () => form.remove());
-  form.querySelector('.save-edit').addEventListener('click', () => {
-    const newAnswer = form.querySelector('input').value.trim();
-    if (!newAnswer) return;
-    socket.emit('edit-answer', {
-      playerName: cell.dataset.player,
-      sectionIdx: parseInt(cell.dataset.section),
-      questionIdx: parseInt(cell.dataset.qi),
-      newAnswer,
-    });
-    form.remove();
-  });
-  form.querySelector('input').focus();
-}
 
 socket.on('answer-updated', ({ playerName, sectionIdx, questionIdx, answer, correct }) => {
-  // Update local reviewData
   if (reviewData) {
     const player = reviewData.players.find((p) => p.name === playerName);
     if (player) player.answers[questionIdx] = { answer, correct };
   }
-  // Update DOM cell
   const cell = reviewBody.querySelector(
     `td[data-player="${CSS.escape(playerName)}"][data-qi="${questionIdx}"]`
   );
   if (!cell) return;
   cell.dataset.correct = correct;
   cell.querySelector('.ans').textContent = answer || '—';
-  const badge = cell.querySelector('.badge');
-  badge.className = `badge ${answer === '' ? 'empty' : (correct ? 'correct' : 'wrong')} correct-toggle`;
-  badge.textContent = answer === '' ? 'no answer' : (correct ? '✓ correct' : '✗ wrong');
-  // Re-attach toggle listener (class was replaced)
-  badge.addEventListener('click', handleBadgeToggle);
+  cell.classList.remove('state-correct', 'state-wrong');
+  cell.classList.add(correct ? 'state-correct' : 'state-wrong');
 });
 
 btnConfirm.addEventListener('click', () => {

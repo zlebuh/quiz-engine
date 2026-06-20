@@ -14,7 +14,7 @@ const PORT = process.env.PORT || 3000;
 const PUBLIC_URL = process.env.PUBLIC_URL || null;
 const SESSION_ID = require('crypto').randomUUID();
 
-const theme = require('./config/theme.json');
+const theme = require('./config/config.json');
 const quiz  = loadQuiz(path.join(__dirname, 'config', 'quiz.md'));
 
 // ── Game state ──────────────────────────────────────────────────────────────
@@ -75,34 +75,13 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/host', (req, res) => res.sendFile(path.join(__dirname, 'public', 'host.html')));
 
-// Theme as CSS custom properties — linked from HTML
 app.get('/custom.css', (req, res) => {
   res.type('text/css').sendFile(path.join(__dirname, 'config', 'custom.css'));
 });
 
-app.get('/theme.css', (req, res) => {
-  const c = theme.colors;
-  res.type('text/css').send(`
-:root {
-  --accent:   ${c.accent};
-  --green:    ${c.primary};
-  --red:      ${c.danger};
-  --bg:       ${c.bg};
-  --surface:  ${c.surface};
-  --surface2: ${c.surface2};
-  --text:     ${c.text};
-  --muted:    ${c.muted};
-  --gold:     ${c.accent};
-  --purple:   ${c.purple   || c.primary};
-  --lime:     ${c.lime     || c.accent};
-}`.trim());
-});
-
-// Theme metadata for JS
 app.get('/api/theme', (req, res) => res.json({
   title: theme.title,
   subtitle: theme.subtitle,
-  emoji: theme.emoji,
 }));
 
 app.get('/qr', async (req, res) => {
@@ -200,16 +179,6 @@ io.on('connection', (socket) => {
     }
   });
 
-  // ── Host: edit answer ──
-  socket.on('edit-answer', ({ playerName, sectionIdx, questionIdx, newAnswer }) => {
-    if (socket.id !== state.hostSocketId) return;
-    const player = Object.values(players).find((p) => p.name === playerName);
-    if (!player) return;
-    const correct = gradeAnswer(newAnswer, quiz[sectionIdx].questions[questionIdx].answer);
-    player.answers[sectionIdx][questionIdx] = { answer: newAnswer, correct };
-    socket.emit('answer-updated', { playerName, sectionIdx, questionIdx, answer: newAnswer, correct });
-  });
-
   // ── Host: override correct flag ──
   socket.on('override-correct', ({ playerName, sectionIdx, questionIdx, correct }) => {
     if (socket.id !== state.hostSocketId) return;
@@ -252,6 +221,10 @@ io.on('connection', (socket) => {
     const correct = gradeAnswer(answer, currentQuestion().answer);
     player.answers[state.sectionIndex][state.questionIndex] = { answer, correct };
     socket.emit('answer-ack', { answer });
+    const submitted = Object.values(players).filter(
+      (p) => p.answers[state.sectionIndex][state.questionIndex].answer !== ''
+    ).length;
+    io.to('host').emit('answer-count', { submitted, total: Object.keys(players).length });
   });
 
   socket.on('disconnect', () => {

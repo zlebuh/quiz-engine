@@ -4,72 +4,86 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Host Panel</title>
-  <link rel="stylesheet" href="/theme.css" />
   <link rel="stylesheet" href="/style.css" />
   <link rel="stylesheet" href="/custom.css" />
   <style>
     .host-bar {
       position: fixed; top: 0; left: 0; right: 0;
-      background: var(--surface); border-bottom: 1px solid var(--surface2);
-      padding: 10px 20px;
-      display: flex; align-items: center; gap: 16px; z-index: 100;
+      background: rgba(12,14,22,0.88);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 24px;
+      display: flex; align-items: center; gap: 14px; z-index: 100;
     }
-    .host-bar h1 { font-size: 1.1rem; margin: 0; }
-    .phase-label { font-size: .8rem; background: var(--green); color: #fff; padding: 2px 10px; border-radius: 20px; }
+    .host-bar h1 { font-size: 1rem; margin: 0; font-weight: 700; letter-spacing: -.01em; }
+    .phase-label {
+      font-size: .7rem; font-weight: 700;
+      background: var(--accent-bg); color: var(--accent);
+      border: 1px solid rgba(240,180,41,0.22);
+      padding: 3px 11px; border-radius: 20px;
+      text-transform: uppercase; letter-spacing: .07em;
+    }
 
     .player-status-bar {
-      position: fixed; top: 48px; left: 0; right: 0;
-      background: var(--bg); border-bottom: 1px solid var(--surface2);
-      padding: 6px 20px;
-      display: flex; align-items: center; gap: 8px; flex-wrap: wrap; z-index: 99;
+      position: fixed; top: 68px; left: 0; right: 0;
+      background: rgba(12,14,22,0.78);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 7px 24px;
+      display: flex; align-items: center; gap: 6px; flex-wrap: wrap; z-index: 99;
     }
-    .player-status-bar .label { font-size: .75rem; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; margin-right: 4px; }
+    .player-status-bar .label {
+      font-size: .7rem; color: var(--muted);
+      text-transform: uppercase; letter-spacing: .08em;
+      font-weight: 600; margin-right: 4px;
+    }
     .ps-chip {
       display: inline-flex; align-items: center; gap: 5px;
-      font-size: .8rem; padding: 2px 10px; border-radius: 20px;
-      background: var(--surface); border: 1px solid var(--surface2);
+      font-size: .78rem; font-weight: 500;
+      padding: 3px 11px; border-radius: 20px;
+      background: var(--surface); border: 1px solid var(--border);
     }
-    .ps-chip .dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
-    .ps-chip.online .dot  { background: #2ea043; }
-    .ps-chip.offline .dot { background: var(--red); }
-    .ps-chip.offline { opacity: .55; }
+    .ps-chip .dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+    .ps-chip.online .dot  { background: var(--green); box-shadow: 0 0 5px rgba(34,197,94,0.6); }
+    .ps-chip.offline .dot { background: var(--muted); }
+    .ps-chip.offline { opacity: .45; }
 
-    body { padding-top: 96px; }
+    body { padding-top: 116px; }
 
-    .review-table td, .review-table th { font-size: .82rem; }
     .correct-toggle { cursor: pointer; user-select: none; }
 
-    .inline-edit-form { display: flex; gap: 6px; align-items: center; margin-top: 4px; }
-    .inline-edit-form input { flex: 1; padding: 4px 8px; font-size: .82rem;
-      background: var(--surface2); border: 1px solid #30363d; border-radius: 6px; color: var(--text); }
-    .inline-edit-form button { padding: 4px 10px; font-size: .78rem; }
   </style>
 </head>
 <body>
   <div class="host-bar">
-    <div id="theme-emoji" style="font-size:1.4rem;margin:0"></div>
-    <h1>Host Panel</h1>
+    <div>
+      <h1 id="host-bar-title">Quiz</h1>
+      <div id="host-bar-subtitle" style="font-size:.72rem;color:var(--muted);margin-top:1px;letter-spacing:.02em"></div>
+    </div>
     <span class="phase-label" id="phase-label">lobby</span>
   </div>
-  <div class="player-status-bar">
+  <div class="player-status-bar hidden">
     <span class="label">Players</span>
     <div id="player-status-chips"></div>
   </div>
 
   <!-- LOBBY -->
-  <div id="screen-lobby" class="card">
+  <div id="screen-lobby" class="card center">
     <h2>Lobby</h2>
-    <div class="flex-row" style="margin-bottom:16px">
-      <div class="qr-box">
-        <img id="qr-img" src="/qr" alt="QR Code" />
-        <div class="url-label" id="url-label">Loading...</div>
-      </div>
-      <div>
-        <h3>Players joined</h3>
-        <div id="lobby-players"><span style="color:var(--muted)">None yet...</span></div>
-      </div>
+    <div class="qr-box">
+      <img id="qr-img" src="/qr" alt="QR Code" />
     </div>
-    <button class="btn-green" id="btn-start-game">Start Quiz (Section 1)</button>
+    <hr>
+    <h3>Players</h3>
+    <div id="lobby-player-chips" style="display:flex;flex-wrap:wrap;gap:10px;justify-content:center;min-height:28px">
+      <span style="color:var(--muted);font-size:.88rem">None yet…</span>
+    </div>
+    <hr>
+    <div class="flex-row">
+      <button class="btn-green" id="btn-start-game">Start Quiz</button>
+    </div>
   </div>
 
   <!-- QUESTION CONTROL -->
@@ -77,11 +91,13 @@
     <span class="section-badge" id="h-section-badge"></span>
     <p style="color:var(--muted);font-size:.85rem;margin-bottom:4px" id="h-progress"></p>
     <p class="question-text" id="h-qtext"></p>
-
+    <hr>
     <div class="flex-row">
       <button class="btn-primary" id="btn-start-timer">▶ Start Timer</button>
       <button class="btn-danger hidden" id="btn-stop-timer">⏹ Stop Timer</button>
     </div>
+
+    <p id="h-answer-count" class="hidden" style="text-align:center;font-size:.9rem;color:var(--muted);margin-top:4px"></p>
 
     <div class="timer-ring hidden" id="h-timer-ring">
       <svg viewBox="0 0 100 100" width="110" height="110">
@@ -93,22 +109,38 @@
 
     <div id="h-after-timer" class="hidden mt">
       <p class="status-msg" style="color:var(--gold)">Timer ended. Players' answers locked.</p>
-      <button class="btn-ghost" id="btn-next-question">Next Question →</button>
+      <div class="flex-row mt">
+        <button class="btn-ghost" id="btn-next-question">Next Question →</button>
+      </div>
     </div>
   </div>
 
   <!-- REVIEW -->
   <div id="screen-review" class="card hidden">
     <h2 id="review-title">Review Answers</h2>
-    <p style="color:var(--muted);margin-bottom:14px">Click ✏ to edit an answer. Click the badge to toggle correct/wrong. When done, confirm to show standings.</p>
+
+    <h3>Questions &amp; Correct Answers</h3>
+    <div style="overflow-x:auto;margin-bottom:4px">
+      <table class="review-table" id="review-questions-table">
+        <thead><tr><th style="width:40px">#</th><th>Question</th><th>Correct Answer</th></tr></thead>
+        <tbody id="review-questions-body"></tbody>
+      </table>
+    </div>
+
+    <hr>
+
+    <h3>Player Answers</h3>
+    <p style="color:var(--muted);font-size:.82rem;margin-bottom:12px">Use ✓ / ✗ to override the automatic grading.</p>
     <div style="overflow-x:auto">
       <table class="review-table" id="review-table">
         <thead id="review-head"></thead>
         <tbody id="review-body"></tbody>
       </table>
     </div>
-    <div class="mt">
-      <button class="btn-green" id="btn-confirm-review">✓ Confirm & Show Standings</button>
+
+    <hr>
+    <div class="flex-row">
+      <button class="btn-green" id="btn-confirm-review">✓ Confirm &amp; Show Standings</button>
     </div>
   </div>
 
@@ -119,7 +151,8 @@
       <thead><tr><th class="rank">#</th><th>Player</th><th>Score</th></tr></thead>
       <tbody id="h-standings-body"></tbody>
     </table>
-    <div class="mt flex-row">
+    <hr>
+    <div class="flex-row">
       <button class="btn-green" id="btn-next-section">Next Section →</button>
     </div>
   </div>
@@ -137,8 +170,9 @@
   <script src="/socket.io/socket.io.js"></script>
   <script>
     fetch('/api/theme').then(r => r.json()).then(t => {
-      document.title = t.title + ' — Host Panel';
-      document.getElementById('theme-emoji').textContent = t.emoji;
+      document.title = t.title + ' — Host';
+      document.getElementById('host-bar-title').textContent = t.title;
+      document.getElementById('host-bar-subtitle').textContent = t.subtitle;
       const go = document.getElementById('gameover-title');
       if (go) go.textContent = t.title + ' — Final Standings';
     });
