@@ -102,7 +102,7 @@ function restoreState(gs) {
   if (gs.phase === 'standings' && gs.scores) {
     standingsTitle.textContent = 'Standings';
     standingsBody.innerHTML = gs.scores.map((s, i) =>
-      `<tr><td class="rank">${i + 1}</td><td>${s.name}</td><td>${s.score}</td></tr>`
+      `<tr><td class="rank">${i + 1}</td><td>${esc(s.name)}</td><td>${s.score}</td></tr>`
     ).join('');
     show('standings');
     return;
@@ -119,7 +119,7 @@ socket.on('join-error', (msg) => {
 
 // ── Lobby ─────────────────────────────────────────────────────────────────────
 socket.on('player-list', (names) => {
-  lobbyPlayers.innerHTML = names.map((n) => `<span class="player-pill">${n}</span>`).join('');
+  lobbyPlayers.innerHTML = names.map((n) => `<span class="player-pill">${esc(n)}</span>`).join('');
 });
 
 // ── Question ─────────────────────────────────────────────────────────────────
@@ -196,7 +196,7 @@ socket.on('show-waiting', ({ message }) => {
 socket.on('show-standings', ({ scores, sectionTitle, isLast }) => {
   standingsTitle.textContent = `Standings after: ${sectionTitle}`;
   standingsBody.innerHTML = scores.map((s, i) =>
-    `<tr><td class="rank">${i + 1}</td><td>${s.name}</td><td>${s.score}</td></tr>`
+    `<tr><td class="rank">${i + 1}</td><td>${esc(s.name)}</td><td>${s.score}</td></tr>`
   ).join('');
   show('standings');
 });
@@ -205,7 +205,7 @@ socket.on('show-standings', ({ scores, sectionTitle, isLast }) => {
 socket.on('game-over', ({ scores }) => {
   localStorage.removeItem('quiz-name');
   gameoverBody.innerHTML = scores.map((s, i) =>
-    `<tr><td class="rank">${i + 1}</td><td>${s.name}</td><td>${s.score}</td></tr>`
+    `<tr><td class="rank">${i + 1}</td><td>${esc(s.name)}</td><td>${s.score}</td></tr>`
   ).join('');
   show('gameover');
 });
